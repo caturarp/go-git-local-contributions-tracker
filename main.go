@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
 	"strings"
 )
 
@@ -58,8 +59,39 @@ func scanGitFolders(folders []string, folder string) []string {
 }
 
 // Recursive search of git repos inside the `folder` subtree
-func recursiveScanFolder(folder string) []string {
+func recursiveScan(folder string) []string {
 	return scanGitFolders(make([]string, 0), folder)
+}
+
+// returns the dot file for the `repos` list.
+func getDotFilePath() string {
+	// Creates it and the enclosing folder if it does not exist.
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// our defined gogitlocalstats
+	dotFile := usr.HomeDir + "/.gogitlocalstats"
+
+	return dotFile
+}
+
+// // User represents a user account.
+// type User struct {
+//     Uid string
+//     Gid string     // primary group ID.
+//     Username string
+//     Name string
+//     HomeDir string
+// }
+
+// addNewSliceElementsToFile given a slice of strings representing paths, stores them
+// to the filesystem
+func addNewSliceElementsToFile(filePath string, newRepos []string) {
+	existingRepos := parseFileLinesToSlice(filePath)
+	repos := joinSlices(newRepos, existingRepos)
+	dumpStringsSliceToFile(repos, filePath)
 }
 
 // Generate stats from contributions with email
